@@ -43,6 +43,8 @@ export interface Review {
 const Reviews: () => Knex.QueryBuilder<Review> = () => knex<Review>("reviews");
 
 // TODO: Make this paginated.
-export function getReviewsForBusiness(business_id: string): Review[] {
+export async function getReviewsForBusiness(
+  business_id: string
+): Promise<Review[]> {
   return Reviews().where("business_id", business_id);
 }
