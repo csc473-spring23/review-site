@@ -1,5 +1,6 @@
-import { describe, expect, test, beforeAll } from "@jest/globals";
+import { describe, expect, test, beforeAll, afterAll } from "@jest/globals";
 import * as dotenv from "dotenv";
+import knex from "../db";
 
 // IMPORTANT: I'm about to interact with the database.
 // This isn't a unit test!
@@ -7,6 +8,10 @@ import { getBusinessById } from "../model";
 
 beforeAll(() => {
   return Promise.resolve(dotenv.config());
+});
+
+afterAll(() => {
+  return knex.destroy();
 });
 
 describe("business table integration tests", () => {
@@ -25,7 +30,7 @@ describe("business table integration tests", () => {
     });
   });
 
-  test("we return undefined when the business doesn't exist", async () => {
-    void expect(getBusinessById("123")).resolves.toEqual(undefined);
+  test("we return undefined when the business doesn't exist", async function () {
+    return expect(getBusinessById("123")).resolves.toEqual(undefined);
   });
 });
