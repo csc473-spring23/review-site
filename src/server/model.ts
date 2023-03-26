@@ -44,7 +44,9 @@ export const insertBusiness = (businesData: Omit<Business, "id">) => {
   return knex.insert(businesData).into("businesses");
 };
 
-export async function getBusinessById(business_id: string): Promise<Business> {
+export async function getBusinessById(
+  business_id: string
+): Promise<Business | undefined> {
   return Businesses().where("business_id", business_id).first();
 }
 
