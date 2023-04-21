@@ -1,23 +1,42 @@
 import { useState } from "react";
 import "./App.css";
 import Auth from "./components/Auth";
-
-type User = {
-  username: string;
-  loggedIn: boolean;
-};
+import MenuBar from "./components/MenuBar";
+import { User } from "./types";
+import * as axios from "axios";
 
 function App() {
   const [user, setUser] = useState<User>();
 
   const login = (username: string, password: string) => {
-    setUser({ username: username, loggedIn: true });
+    const authResponse = axios.default.post("/login", {
+      username: username,
+      password: password,
+    });
+    authResponse
+      .then((resp) => {
+        if (resp.status === 200) {
+          // we should get a token back
+          setUser({
+            username: username,
+            loggedIn: true,
+            token: resp.data.token,
+          });
+        }
+      })
+      .catch((reason) => {
+        console.log(reason);
+        // login failed;
+      });
   };
 
   return (
-    <div className="App">
-      <Auth login={login}></Auth>
-    </div>
+    <>
+      <MenuBar user={user}></MenuBar>
+      <div className="App">
+        <Auth login={login}></Auth>
+      </div>
+    </>
   );
 }
 

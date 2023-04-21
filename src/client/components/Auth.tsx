@@ -9,30 +9,33 @@ export default function Auth({ login }: AuthProps): JSX.Element {
 
     // in reality, I'd call /login on the backed to log in the user,
     // but let's pretend it just works
-    console.log(username, password);
+    console.log(username?.value, password?.value);
 
-    if (password?.textContent === "password") {
-      if (username?.textContent != null) {
-        login(username?.textContent, password?.textContent);
+    if (password?.value === "password") {
+      if (username?.value != null) {
+        login(username?.value, password?.value);
       }
     } else {
       // handle login failure
+      alert("Invalid login!");
     }
   };
 
   return (
-    <div>
+    <div className="border p-4 border-indigo-200 border-solid">
       <div>
         <label>
-          Username: <input id="username"></input>
+          Username: <input className="border m-4" id="username"></input>
         </label>
       </div>
       <div>
         <label>
-          Password: <input id="pass" type="password"></input>
+          Password: <input className="border" id="pass" type="password"></input>
         </label>
       </div>
-      <button onClick={loginHandler}>Login!</button>
+      <button className="border" onClick={loginHandler}>
+        Login!
+      </button>
     </div>
   );
 }

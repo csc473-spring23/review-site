@@ -1,6 +1,7 @@
 import knex from "./db";
 import type { Knex } from "knex";
 import { DateTime } from "luxon";
+import * as argon2 from "argon2";
 
 // define some types that represent the records in our database
 export interface User {
@@ -8,6 +9,8 @@ export interface User {
   user_id: string;
   name: string;
   join_date: DateTime;
+  username: string;
+  password: string;
 }
 
 const Users: () => Knex.QueryBuilder<User> = () => knex<User>("users");
@@ -16,6 +19,20 @@ export const getUserById = (user_id: string) => {
   // build my user lookup query
   return Users().where("user_id", user_id).first();
 };
+
+export async function getUserByUsername(
+  username: string
+): Promise<User | undefined> {
+  // usernames are unique
+  return Users().where("username", username).first();
+}
+
+export async function setPassword(id: number, password: string) {
+  const hashedPassword = await argon2.hash(password);
+  console.log(`hashed password: ${hashedPassword}`);
+  console.log(`setting password for user id ${id}`);
+  return Users().where("id", id).update({ password: hashedPassword });
+}
 
 type UserWithoutId = Omit<User, "id">;
 
