@@ -6,9 +6,10 @@ import {
   getBusinessHandler,
   getBusinessReviewHandler,
 } from "./routes/business";
-import { loginHandler } from "./routes/login";
+import { LoginPayload, loginHandler } from "./routes/login";
 import { ApplicationError } from "./errors";
 import { getUserByUsername, setPassword } from "./model";
+import { Request } from "express";
 
 // first things first, load the environment variables
 dotenv.config();
@@ -17,7 +18,7 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/login", (req, resp) => {
+app.post("/login", (req: Request<object, unknown, LoginPayload>, resp) => {
   console.log("got a login");
   // extract the username and password from the body of the request
   const { username, password } = req.body;
@@ -34,25 +35,28 @@ app.post("/login", (req, resp) => {
     });
 });
 
-app.post("/setPassword", (req, resp) => {
-  const { username, password } = req.body;
+app.post(
+  "/setPassword",
+  (req: Request<object, unknown, LoginPayload>, resp) => {
+    const { username, password } = req.body;
 
-  // find the user id
-  getUserByUsername(username)
-    .then((user) => {
-      if (user) {
-        return setPassword(user?.id, password);
-      } else {
-        return Promise.reject("unknown user");
-      }
-    })
-    .then(() => {
-      resp.send("OK");
-    })
-    .catch((reason) => {
-      resp.status(500).send(reason);
-    });
-});
+    // find the user id
+    getUserByUsername(username)
+      .then((user) => {
+        if (user) {
+          return setPassword(user?.id, password);
+        } else {
+          return Promise.reject("unknown user");
+        }
+      })
+      .then(() => {
+        resp.send("OK");
+      })
+      .catch((reason) => {
+        resp.status(500).send(reason);
+      });
+  }
+);
 
 app.get("/api", (req, resp) => {
   resp.send({ foo: "bar" });

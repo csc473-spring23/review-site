@@ -1,15 +1,19 @@
 import * as argon2 from "argon2";
 import { getUserByUsername } from "../model";
 import { ApplicationError } from "../errors";
-import * as jwtoken from "jsonwebtoken";
+import { sign } from "jsonwebtoken";
 
-// const hash = await argon2.hash(..);
+export type LoginPayload = {
+  username: string;
+  password: string;
+};
 
 type LoginToken = {
   token: string;
 };
 
-const jwtSecret = process.env["JWT_SECRET"];
+// make this a function so that we know nodenv.config has been called before the const is assigned
+const jwtSecret = () => process.env.JWT_SECRET;
 
 export async function loginHandler(
   username: string,
@@ -19,21 +23,18 @@ export async function loginHandler(
   // then hash the password and compare
   const user = await getUserByUsername(username);
   if (user === undefined) {
-    console.log("user not found");
     return Promise.reject(ApplicationError.LOGIN_FAILED);
   } else {
-    const hashedInput = await argon2.hash(password);
-    if (user.password === hashedInput) {
-      console.log("wrong password");
-      if (jwtSecret) {
+    const passwordOk = await argon2.verify(user.password, password);
+    if (passwordOk) {
+      const secret = jwtSecret();
+      if (secret) {
         // we should login the user, so we need to generate them a token
-        const token = jwtoken.sign({ username: username }, jwtSecret, {
+        const token = sign({ username: username }, secret, {
           expiresIn: "1h",
         });
-        console.log("generated token");
         return { token: token };
       } else {
-        console.log("no secret");
         return Promise.reject("no secret!");
       }
     }

@@ -4,6 +4,7 @@ import Auth from "./components/Auth";
 import MenuBar from "./components/MenuBar";
 import { User } from "./types";
 import * as axios from "axios";
+import { AuthResponse } from "./types/auth";
 
 function App() {
   const [user, setUser] = useState<User>();
@@ -14,7 +15,7 @@ function App() {
       password: password,
     });
     authResponse
-      .then((resp) => {
+      .then((resp: axios.AxiosResponse<AuthResponse, unknown>) => {
         if (resp.status === 200) {
           // we should get a token back
           setUser({
