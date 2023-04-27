@@ -1,20 +1,28 @@
 import { FormEvent } from "react";
 import { useAuth } from "../auth/auth_context";
+import { To, useLocation, useNavigate } from "react-router";
 
 export default function Auth(): JSX.Element {
   const auth = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // because we're going to redirect after login, we need to know where the user came from
+  const from = location.state?.from?.pathname || "/";
+
+  console.log("Previous location: ", from);
 
   const loginHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
     const { username, password } = Object.fromEntries(formData);
-    // in reality, I'd call /login on the backed to log in the user,
-    // but let's pretend it just works
-    console.log(username as string, password as string);
 
     if (username != null) {
       auth.login(username as string, password as string, () => {
+        // assume we logged in successfully, so go back where we came from
+        // replace: true means we alter the history so that we don't back button to the login page
+        navigate(from as To, { replace: true });
         console.log("Logged in successfully");
       });
     } else {

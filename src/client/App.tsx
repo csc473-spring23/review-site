@@ -1,19 +1,41 @@
 import "./App.css";
 import Auth from "./components/Auth";
-import MenuBar from "./components/MenuBar";
 import AuthProvider from "./auth/AuthProvider";
+import { createBrowserRouter } from "react-router-dom";
+import Root from "./components/Root";
+import Home from "./components/Home";
+import { RouterProvider } from "react-router";
+import Business from "./components/business/Business";
+import businessLoader from "./components/business/loader";
+
+const router: Router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "login",
+        element: <Auth />,
+      },
+      {
+        path: "/business/:id",
+        element: <Business />,
+        loader: businessLoader,
+      },
+    ],
+  },
+]);
 
 function App() {
   return (
     // AuthProvider will take care of managing the auth context for us
     // as well as the user state
     <AuthProvider>
-      {/* Menu bar basically persists on every "page" of our application */}
-      <MenuBar></MenuBar>
-      <div className="App">
-        {/* the real changing part is here*/}
-        <Auth></Auth>
-      </div>
+      <RouterProvider router={router}></RouterProvider>
     </AuthProvider>
   );
 }

@@ -58,10 +58,6 @@ app.post(
   }
 );
 
-app.get("/api", (req, resp) => {
-  resp.send({ foo: "bar" });
-});
-
 app.get("/api/business/:business_id", (req, resp) => {
   // step 1: extract the business id
   // we shouldn't have to worry that the business id doesn't exist because we matched the route
@@ -94,6 +90,16 @@ app.get("/api/business/:business_id/review/", (req, resp) => {
         resp.status(500).send(`unknown error`);
       }
     });
+});
+
+app.get("/api/search", (req, resp) => {
+  resp.send();
+});
+
+app.post("/api/business/:business_id/review", (req, resp) => {
+  // I should be able to post a review for a business
+  // this also needs some auth/jwt middleware to check that I'm logged in
+  resp.send();
 });
 
 ViteExpress.listen(app, 3000, () => {
