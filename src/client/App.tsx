@@ -1,43 +1,20 @@
-import { useState } from "react";
 import "./App.css";
 import Auth from "./components/Auth";
 import MenuBar from "./components/MenuBar";
-import { User } from "./types";
-import * as axios from "axios";
-import { AuthResponse } from "./types/auth";
+import AuthProvider from "./auth/AuthProvider";
 
 function App() {
-  const [user, setUser] = useState<User>();
-
-  const login = (username: string, password: string) => {
-    const authResponse = axios.default.post("/login", {
-      username: username,
-      password: password,
-    });
-    authResponse
-      .then((resp: axios.AxiosResponse<AuthResponse, unknown>) => {
-        if (resp.status === 200) {
-          // we should get a token back
-          setUser({
-            username: username,
-            loggedIn: true,
-            token: resp.data.token,
-          });
-        }
-      })
-      .catch((reason) => {
-        console.log(reason);
-        // login failed;
-      });
-  };
-
   return (
-    <>
-      <MenuBar user={user}></MenuBar>
+    // AuthProvider will take care of managing the auth context for us
+    // as well as the user state
+    <AuthProvider>
+      {/* Menu bar basically persists on every "page" of our application */}
+      <MenuBar></MenuBar>
       <div className="App">
-        <Auth login={login}></Auth>
+        {/* the real changing part is here*/}
+        <Auth></Auth>
       </div>
-    </>
+    </AuthProvider>
   );
 }
 

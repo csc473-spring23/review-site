@@ -1,24 +1,22 @@
 import { FormEvent } from "react";
+import { useAuth } from "../auth/auth_context";
 
-type AuthProps = {
-  login: (username: string, password: string) => void;
-};
+export default function Auth(): JSX.Element {
+  const auth = useAuth();
 
-export default function Auth({ login }: AuthProps): JSX.Element {
   const loginHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-    console.log(formData);
     const { username, password } = Object.fromEntries(formData);
     // in reality, I'd call /login on the backed to log in the user,
     // but let's pretend it just works
     console.log(username as string, password as string);
 
-    if (password === "password") {
-      if (username != null) {
-        login(username as string, password as string);
-      }
+    if (username != null) {
+      auth.login(username as string, password as string, () => {
+        console.log("Logged in successfully");
+      });
     } else {
       // handle login failure
       alert("Invalid login!");
