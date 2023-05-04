@@ -3,6 +3,9 @@ import {
   Business,
   Review,
   getReviewsForBusiness,
+  insertReview,
+  IncomingReview,
+  getUserByUsername,
 } from "../model";
 import { ApplicationError } from "../errors";
 
@@ -37,4 +40,25 @@ export async function getBusinessReviewHandler(
     }
   }
   return reviews;
+}
+
+export async function addReviewHandler(
+  username: string,
+  review: IncomingReview
+): Promise<void> {
+  // we need to find the user id to populate the actual review
+  const user = await getUserByUsername(username);
+
+  if (!user) {
+    return Promise.reject(ApplicationError.UNKNOWN_USER);
+  }
+
+  const toInsert: Omit<Review, "id" | "review_id"> = {
+    ...review,
+    user_id: user.user_id,
+  };
+
+  return insertReview(toInsert).then(() => {
+    // just so we have a promise of a void
+  });
 }

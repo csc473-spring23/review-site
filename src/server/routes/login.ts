@@ -13,7 +13,7 @@ type LoginToken = {
 };
 
 // make this a function so that we know nodenv.config has been called before the const is assigned
-const jwtSecret = () => process.env.JWT_SECRET;
+export const jwtSecret = () => process.env.JWT_SECRET;
 
 export async function loginHandler(
   username: string,

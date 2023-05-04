@@ -73,10 +73,13 @@ export interface Review {
   user_id: string;
   business_id: string;
   text: string;
-  stars: number;
-  useful_count: number;
+  stars?: number;
+  useful_count?: number;
 }
-
+export type IncomingReview = Omit<
+  Review,
+  "id" | "review_id" | "useful_count" | "user_id"
+>;
 const Reviews: () => Knex.QueryBuilder<Review> = () => knex<Review>("reviews");
 
 // TODO: Make this paginated.
@@ -84,4 +87,9 @@ export async function getReviewsForBusiness(
   business_id: string
 ): Promise<Review[]> {
   return Reviews().where("business_id", business_id);
+}
+
+export async function insertReview(review: IncomingReview): Promise<Review> {
+  // in theory, I have everything already in the Review object except the id
+  return Reviews().insert(review);
 }

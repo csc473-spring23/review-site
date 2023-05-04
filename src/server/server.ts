@@ -3,13 +3,16 @@ import ViteExpress from "vite-express";
 import * as dotenv from "dotenv";
 
 import {
+  addReviewHandler,
   getBusinessHandler,
   getBusinessReviewHandler,
 } from "./routes/business";
-import { LoginPayload, loginHandler } from "./routes/login";
+import { LoginPayload, loginHandler, jwtSecret } from "./routes/login";
 import { ApplicationError } from "./errors";
 import { getUserByUsername, setPassword } from "./model";
 import { Request } from "express";
+import { expressjwt, Request as JWTRequest } from "express-jwt";
+import { Secret } from "jsonwebtoken";
 
 // first things first, load the environment variables
 dotenv.config();
@@ -34,29 +37,6 @@ app.post("/login", (req: Request<object, unknown, LoginPayload>, resp) => {
       }
     });
 });
-
-app.post(
-  "/setPassword",
-  (req: Request<object, unknown, LoginPayload>, resp) => {
-    const { username, password } = req.body;
-
-    // find the user id
-    getUserByUsername(username)
-      .then((user) => {
-        if (user) {
-          return setPassword(user?.id, password);
-        } else {
-          return Promise.reject("unknown user");
-        }
-      })
-      .then(() => {
-        resp.send("OK");
-      })
-      .catch((reason) => {
-        resp.status(500).send(reason);
-      });
-  }
-);
 
 app.get("/api/business/:business_id", (req, resp) => {
   // step 1: extract the business id
@@ -96,11 +76,53 @@ app.get("/api/search", (req, resp) => {
   resp.send();
 });
 
-app.post("/api/business/:business_id/review", (req, resp) => {
-  // I should be able to post a review for a business
-  // this also needs some auth/jwt middleware to check that I'm logged in
-  resp.send();
-});
+app.post(
+  "/api/business/:business_id/review",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises, @typescript-eslint/no-non-null-assertion
+  expressjwt({ secret: jwtSecret()! as Secret, algorithms: ["HS256"] }),
+  (req: JWTRequest, resp) => {
+    const token = req.auth;
+    const data = req.body as { business_id: string; text: string };
+    if (!token) {
+      // not logged in (we'll assume the token hasn't expired -- need to check if the middleware rejects)
+      resp.status(401).send();
+    } else {
+      addReviewHandler(token.user as string, data)
+        .then(() => resp.send())
+        .catch((err) => {
+          if (err == ApplicationError.UNKNOWN_USER) {
+            // the request was bad, but let's not actually say the user doesn't exist to hide that information
+            resp.status(400).send();
+          }
+          console.error("Review addition failed", err);
+          resp.status(500).send();
+        });
+    }
+  }
+);
+
+app.post(
+  "/setPassword",
+  (req: Request<object, unknown, LoginPayload>, resp) => {
+    const { username, password } = req.body;
+
+    // find the user id
+    getUserByUsername(username)
+      .then((user) => {
+        if (user) {
+          return setPassword(user?.id, password);
+        } else {
+          return Promise.reject("unknown user");
+        }
+      })
+      .then(() => {
+        resp.send("OK");
+      })
+      .catch((reason) => {
+        resp.status(500).send(reason);
+      });
+  }
+);
 
 ViteExpress.listen(app, 3000, () => {
   console.log("Server is listening on port 3000...");
