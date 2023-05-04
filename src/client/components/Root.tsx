@@ -5,7 +5,7 @@ export default function Root() {
   return (
     <>
       <MenuBar></MenuBar>
-      <div className="App">
+      <div className="App container p-10">
         {/* the real changing part is here*/}
         <Outlet />
       </div>

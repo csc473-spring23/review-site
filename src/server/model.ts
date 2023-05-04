@@ -54,7 +54,7 @@ export interface Business {
   //hours: string; // doesn't exist yet; what's the right way to store it?
 }
 
-const Businesses: () => Knex.QueryBuilder<Business> = () =>
+export const Businesses: () => Knex.QueryBuilder<Business> = () =>
   knex<Business>("businesses");
 
 export const insertBusiness = (businesData: Omit<Business, "id">) => {

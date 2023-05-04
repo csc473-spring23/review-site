@@ -13,6 +13,7 @@ import { getUserByUsername, setPassword } from "./model";
 import { Request } from "express";
 import { expressjwt, Request as JWTRequest } from "express-jwt";
 import { Secret } from "jsonwebtoken";
+import search from "./routes/search";
 
 // first things first, load the environment variables
 dotenv.config();
@@ -73,7 +74,13 @@ app.get("/api/business/:business_id/review/", (req, resp) => {
 });
 
 app.get("/api/search", (req, resp) => {
-  resp.send();
+  const query: string = req.query.q as string;
+  search(query)
+    .then((result) => resp.send({ results: result }))
+    .catch((err) => {
+      console.error("Search failed", err);
+      resp.status(500).send();
+    });
 });
 
 app.post(
