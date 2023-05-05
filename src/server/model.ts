@@ -80,13 +80,42 @@ export type IncomingReview = Omit<
   Review,
   "id" | "review_id" | "useful_count" | "user_id"
 >;
+
 const Reviews: () => Knex.QueryBuilder<Review> = () => knex<Review>("reviews");
+
+export interface ReviewResponse {
+  name: string;
+  text: string;
+  stars?: number;
+  useful_count?: number;
+  review_id: string;
+}
 
 // TODO: Make this paginated.
 export async function getReviewsForBusiness(
+  business_id: string,
+  offset?: number,
+  limit?: number
+): Promise<ReviewResponse[]> {
+  return knex
+    .select<ReviewResponse[]>(
+      "name",
+      "text",
+      "stars",
+      "useful_count",
+      "review_id"
+    )
+    .from("reviews")
+    .innerJoin("users", "users.user_id", "=", "reviews.user_id")
+    .where("business_id", business_id)
+    .offset(offset || 0)
+    .limit(limit || 10);
+}
+
+export async function countReviewsForBusiness(
   business_id: string
-): Promise<Review[]> {
-  return Reviews().where("business_id", business_id);
+): Promise<{ count: number }> {
+  return Reviews().where("business_id", business_id).count().first();
 }
 
 export async function insertReview(review: IncomingReview): Promise<Review> {

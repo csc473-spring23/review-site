@@ -3,6 +3,7 @@ import ViteExpress from "vite-express";
 import * as dotenv from "dotenv";
 
 import {
+  Pagination,
   addReviewHandler,
   getBusinessHandler,
   getBusinessReviewHandler,
@@ -60,7 +61,15 @@ app.get("/api/business/:business_id", (req, resp) => {
 app.get("/api/business/:business_id/review/", (req, resp) => {
   const { business_id } = req.params;
 
-  void getBusinessReviewHandler(business_id)
+  // check on our query params
+  const { nextPageRaw } = req.query;
+  const nextPage = nextPageRaw ? parseInt(nextPageRaw as string) : undefined;
+
+  const pagination: Pagination | undefined = nextPage
+    ? { offset: nextPage }
+    : undefined;
+
+  void getBusinessReviewHandler(business_id, pagination)
     .then((reviews) => {
       resp.send(reviews);
     })
@@ -68,6 +77,7 @@ app.get("/api/business/:business_id/review/", (req, resp) => {
       if (err === ApplicationError.UNKNOWN_BUSINESS) {
         resp.status(404).send("unknown business");
       } else {
+        console.log(err);
         resp.status(500).send(`unknown error`);
       }
     });
