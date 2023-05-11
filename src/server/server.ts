@@ -19,6 +19,8 @@ import search from "./routes/search";
 // first things first, load the environment variables
 dotenv.config();
 
+console.log(jwtSecret());
+
 const app = express();
 
 app.use(express.json());

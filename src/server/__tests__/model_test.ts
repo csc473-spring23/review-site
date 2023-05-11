@@ -27,6 +27,7 @@ describe("business table integration tests", () => {
       postcode: "83646",
       state: "ID",
       street: "3340 N Eagle Rd",
+      name_vec: "'cooki':2 'crumbl':1 'meridian':3",
     });
   });
 
