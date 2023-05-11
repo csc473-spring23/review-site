@@ -19,7 +19,7 @@ import search from "./routes/search";
 // first things first, load the environment variables
 dotenv.config();
 
-console.log(jwtSecret());
+console.log(process.env.DB_HOST);
 
 const app = express();
 
