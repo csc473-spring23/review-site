@@ -75,5 +75,5 @@ jobs:
         run: pnpm build
       - name: Build docker image
         env:
-          JWT_SECRET: { { secrets.JWT_SECRET } }
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: ./build_docker.sh
