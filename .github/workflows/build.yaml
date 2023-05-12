@@ -39,6 +39,7 @@ jobs:
 
   build-docker-image:
     runs-on: ubuntu-latest
+    environment: dockerbuild
     needs: test
     steps:
       - name: Checkout
@@ -73,4 +74,6 @@ jobs:
       - name: build
         run: pnpm build
       - name: Build docker image
+        env:
+          JWT_SECRET: { { secrets.JWT_SECRET } }
         run: ./build_docker.sh
